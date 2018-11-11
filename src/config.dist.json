@@ -1,0 +1,14 @@
+{
+  "mysql": {
+    "host": "localhost",
+    "user": "root",
+    "password": ""
+  },
+  "default_quota": "5G",
+  "databases": {
+    "information_schema": "-1",
+    "mysql": "-1",
+    "performance_schema": "-1",
+    "sys": "-1"
+  }
+}
