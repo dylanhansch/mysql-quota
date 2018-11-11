@@ -134,4 +134,5 @@ def run():
         conn.close()
 
 
-run()
+if __name__ == '__main__':
+    run()
