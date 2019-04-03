@@ -4,6 +4,7 @@ from mysql.connector import errorcode as mysql_errorcode
 from json import load as json_load
 from re import match, fullmatch
 from os.path import isfile
+from time import sleep
 
 DEFAULT_CONFIG = 'config.json'
 
@@ -148,6 +149,57 @@ def get_db_usage(conn, database: str) -> int:
     return used_space
 
 
+def limit(conn, database: str) -> None:
+    print('Limiting ' + database)
+    conn.config(database='mysql')
+    conn.reconnect()
+
+    cursor = conn.cursor()
+    cursor.execute("UPDATE db SET Insert_priv='N', Create_priv='N', Update_priv='N' WHERE Db='" + database + "'")
+    cursor.close()
+
+    conn.config(database=None)
+    conn.reconnect()
+
+
+def unlimit(conn, database: str) -> None:
+    print('Unlimiting ' + database)
+    conn.config(database='mysql')
+    conn.reconnect()
+
+    cursor = conn.cursor()
+    cursor.execute("UPDATE db SET Insert_priv='Y', Create_priv='Y', Update_priv='Y' WHERE Db='" + database + "'")
+    cursor.close()
+
+    conn.config(database=None)
+    conn.reconnect()
+
+
+def is_limited(conn, database: str) -> bool:
+    conn.config(database='mysql')
+    conn.reconnect()
+
+    cursor = conn.cursor()
+    cursor.execute("SELECT Insert_priv,Create_priv,Update_priv FROM db WHERE Db='" + database + "'")
+
+    limited = False
+    for row in cursor.fetchall():
+        for column in row:
+            if column == 'N':
+                limited = True
+                break
+
+        if limited:
+            break
+
+    cursor.close()
+
+    conn.config(database=None)
+    conn.reconnect()
+
+    return limited
+
+
 def run() -> None:
     try:
         config = get_json_config()
@@ -161,12 +213,10 @@ def run() -> None:
                 used_space = get_db_usage(conn, database_name)
 
                 # Database's used space is greater or equal to the database's quota
-                # TODO: Disable create, insert, and update
-                if used_space >= to_bytes(get_quota(database_name)):
-                    print(database_name + ' needs to be limited')
-                else:
-                    # TODO: If the usage is fine make sure to revert the restrictions on limited DBs
-                    print(database_name + ' is all good')
+                if used_space >= to_bytes(get_quota(database_name)) and not is_limited(conn, database_name):
+                    limit(conn, database_name)
+                elif used_space < to_bytes(get_quota(database_name)) and is_limited(conn, database_name):
+                    unlimit(conn, database_name)
     except mysql_error as e:
         if e.errno == mysql_errorcode.ER_ACCESS_DENIED_ERROR:
             print("Incorrect user and password combination")
@@ -179,4 +229,6 @@ def run() -> None:
 
 
 if __name__ == '__main__':
-    run()
+    while True:
+        run()
+        sleep(60)  # sleep for 60 seconds
