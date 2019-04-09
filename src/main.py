@@ -155,7 +155,9 @@ def limit(conn, database: str) -> None:
     conn.reconnect()
 
     cursor = conn.cursor()
-    cursor.execute("UPDATE db SET Insert_priv='N', Create_priv='N', Update_priv='N' WHERE Db='" + database + "'")
+    # TODO: Foreach user
+    cursor.execute("REVOKE create,insert,update ON " + database + ".* FROM '" + database + "'@'%';")
+    # TODO: Kill all connections for user
     cursor.close()
 
     conn.config(database=None)
@@ -168,7 +170,9 @@ def unlimit(conn, database: str) -> None:
     conn.reconnect()
 
     cursor = conn.cursor()
-    cursor.execute("UPDATE db SET Insert_priv='Y', Create_priv='Y', Update_priv='Y' WHERE Db='" + database + "'")
+    # TODO: Foreach user
+    cursor.execute("GRANT create,insert,update ON " + database + ".* TO '" + database + "'@'%';")
+    # TODO: Kill all connections for user
     cursor.close()
 
     conn.config(database=None)
