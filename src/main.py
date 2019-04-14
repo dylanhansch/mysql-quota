@@ -155,9 +155,10 @@ def limit(conn, database: str) -> None:
     conn.reconnect()
 
     cursor = conn.cursor()
-    # TODO: Foreach user
-    cursor.execute("REVOKE create,insert,update ON " + database + ".* FROM '" + database + "'@'%';")
-    # TODO: Kill all connections for user
+    for user in db_users(conn, database):
+        cursor.execute("REVOKE create,insert,update ON " + database + ".* FROM '" + user['user'] + "'@'" + user['host'] + "';")
+        kill_user(conn, database, user['user'])
+
     cursor.close()
 
     conn.config(database=None)
@@ -170,9 +171,10 @@ def unlimit(conn, database: str) -> None:
     conn.reconnect()
 
     cursor = conn.cursor()
-    # TODO: Foreach user
-    cursor.execute("GRANT create,insert,update ON " + database + ".* TO '" + database + "'@'%';")
-    # TODO: Kill all connections for user
+    for user in db_users(conn, database):
+        cursor.execute("GRANT create,insert,update ON " + database + ".* TO '" + user['user'] + "'@'" + user['host'] + "';")
+        kill_user(conn, database, user['user'])
+
     cursor.close()
 
     conn.config(database=None)
@@ -202,6 +204,46 @@ def is_limited(conn, database: str) -> bool:
     conn.reconnect()
 
     return limited
+
+
+def db_users(conn, database: str) -> list:
+    users = []
+
+    conn.config(database='mysql')
+    conn.reconnect()
+
+    cursor = conn.cursor()
+    cursor.execute("SELECT `user`,`host` FROM db WHERE `db` = %s;", (database,))
+
+    for row in cursor.fetchall():
+        user = row[0]
+        host = row[1]
+        users.append({'user': user, 'host': host})
+
+    cursor.close()
+
+    conn.config(database=None)
+    conn.reconnect()
+
+    return users
+
+
+def kill_user(conn, database: str, user: str) -> None:
+    conn.config(database='information_schema')
+    conn.reconnect()
+
+    cursor = conn.cursor()
+    cursor.execute("SELECT `id` FROM processlist WHERE `db` = %s AND `user` = %s;", (database, user))
+
+    for row in cursor.fetchall():
+        pid = str(row[0])
+        print("Killing MySQL user PID: " + pid)
+        cursor.execute("KILL " + pid + ";")
+
+    cursor.close()
+
+    conn.config(database=None)
+    conn.reconnect()
 
 
 def run() -> None:
