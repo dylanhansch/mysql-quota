@@ -150,6 +150,9 @@ def get_db_usage(conn, database: str) -> int:
 
 
 def limit(conn, database: str) -> None:
+    if not isinstance(database, str):
+        raise TypeError('Database parameter must be a string.')
+
     print('Limiting ' + database)
     conn.config(database='mysql')
     conn.reconnect()
@@ -166,6 +169,9 @@ def limit(conn, database: str) -> None:
 
 
 def unlimit(conn, database: str) -> None:
+    if not isinstance(database, str):
+        raise TypeError('Database parameter must be a string.')
+
     print('Unlimiting ' + database)
     conn.config(database='mysql')
     conn.reconnect()
@@ -182,6 +188,9 @@ def unlimit(conn, database: str) -> None:
 
 
 def is_limited(conn, database: str) -> bool:
+    if not isinstance(database, str):
+        raise TypeError('Database parameter must be a string.')
+
     conn.config(database='mysql')
     conn.reconnect()
 
@@ -207,6 +216,9 @@ def is_limited(conn, database: str) -> bool:
 
 
 def db_users(conn, database: str) -> list:
+    if not isinstance(database, str):
+        raise TypeError('Database parameter must be a string.')
+
     users = []
 
     conn.config(database='mysql')
@@ -229,6 +241,12 @@ def db_users(conn, database: str) -> list:
 
 
 def kill_user(conn, database: str, user: str) -> None:
+    if not isinstance(database, str):
+        raise TypeError('Database parameter must be a string.')
+
+    if not isinstance(user, str):
+        raise TypeError('User parameter must be a string.')
+
     conn.config(database='information_schema')
     conn.reconnect()
 
