@@ -9,7 +9,7 @@ from time import sleep
 DEFAULT_CONFIG = 'config.json'
 
 
-def get_json_config(file: str=DEFAULT_CONFIG):
+def get_json_config(file: str = DEFAULT_CONFIG):
     if not isinstance(file, str):
         raise TypeError('Optional file parameter must be a string.')
 
@@ -35,7 +35,7 @@ def check_quota_format(value: str) -> bool:
     return True
 
 
-def get_default_quota(in_bytes: bool=False) -> str:
+def get_default_quota(in_bytes: bool = False) -> str:
     if not isinstance(in_bytes, bool):
         raise TypeError('Optional in_bytes parameter must be a boolean.')
 
