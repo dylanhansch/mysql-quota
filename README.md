@@ -6,4 +6,4 @@ Currently, we are not storing permissions prior to limits being placed. This mea
 
 ## Cron Job Example
 Will run script every minute: 
-``* * * * * /usr/bin/python3 /home/quota/mysql-quota/src/main.py > /home/quota/mysql-quota/src/quota.log``
+``* * * * * /usr/bin/python3 /home/quota/mysql-quota/src/main.py >> /home/quota/mysql-quota/src/quota.log``
