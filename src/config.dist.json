@@ -4,7 +4,6 @@
     "user": "root",
     "password": ""
   },
-  "check_frequency": 60,
   "default_quota": "5G",
   "databases": {
     "information_schema": "-1",

@@ -293,6 +293,4 @@ def run() -> None:
 
 
 if __name__ == '__main__':
-    while True:
-        run()
-        sleep(get_json_config()['check_frequency'])  # wait X seconds before checking again
+    run()
