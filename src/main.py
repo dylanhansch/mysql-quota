@@ -3,13 +3,14 @@ from mysql.connector import Error as mysql_error
 from mysql.connector import errorcode as mysql_errorcode
 from json import load as json_load
 from re import match, fullmatch
-from os.path import isfile
-from time import sleep
+from os.path import isfile, dirname, join
 
 DEFAULT_CONFIG = 'config.json'
 
 
-def get_json_config(file: str = DEFAULT_CONFIG):
+def get_json_config(file_name: str = DEFAULT_CONFIG):
+    file = join(dirname(__file__), file_name)
+
     if not isinstance(file, str):
         raise TypeError('Optional file parameter must be a string.')
 
